@@ -45,11 +45,11 @@ return {
       end
     end,
   },
-  {
-    "rafamadriz/friendly-snippets",
-    -- event = "InsertCharPre",
-    -- disable = not lvim.builtin.compe.active,
-  },
+  -- {
+  --   "rafamadriz/friendly-snippets",
+  --   -- event = "InsertCharPre",
+  --   -- disable = not lvim.builtin.compe.active,
+  -- },
 
   -- Autopairs
   {

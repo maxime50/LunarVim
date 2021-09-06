@@ -130,4 +130,20 @@ function M.change_tree_dir(dir)
   end
 end
 
+function M.collapse_everything()
+  local lib = require "nvim-tree.lib"
+
+  local function recursive_delete(entries)
+    for _, node in ipairs(entries) do
+      if node.open then
+        lib.close_node(node)
+        recursive_delete(node.entries)
+      end
+    end
+  end
+
+  recursive_delete(lib.Tree.entries)
+  lib.refresh_tree()
+end
+
 return M
