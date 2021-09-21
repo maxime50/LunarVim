@@ -416,6 +416,24 @@ lvim.lang = {
       },
     },
   },
+  prisma = {
+    formatters = {
+      -- {
+      --   exe = "erlfmt",
+      --   args = {},
+      -- },
+    },
+    linters = {},
+    lsp = {
+      provider = "prismals",
+      setup = {
+        cmd = {
+          ls_install_prefix .. "/prismals/node_modules/.bin/prisma-language-server",
+          "--stdio",
+        },
+      },
+    },
+  },
   emmet = { active = false },
   fish = {
     formatters = {
