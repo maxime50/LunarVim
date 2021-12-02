@@ -5,7 +5,7 @@ M.config = function()
   lvim.builtin["terminal"] = {
     on_config_done = nil,
     -- size can be a number or function which is passed the current terminal
-    size = 20,
+    size = 200,
     -- open_mapping = [[<c-\>]],
     open_mapping = [[<c-t>]],
     hide_numbers = true, -- hide the number column in toggleterm buffers
@@ -40,7 +40,7 @@ M.config = function()
     -- lvim.builtin.terminal.execs = {{}} to overwrite
     -- lvim.builtin.terminal.execs[#lvim.builtin.terminal.execs+1] = {"gdb", "tg", "GNU Debugger"}
     execs = {
-      { "lazygit", "gg", "LazyGit" },
+      { "lazygit", "<A-l>", "LazyGit", "horizontal" },
     },
   }
 end
@@ -48,7 +48,7 @@ end
 M.setup = function()
   local terminal = require "toggleterm"
   for _, exec in pairs(lvim.builtin.terminal.execs) do
-    require("lvim.core.terminal").add_exec(exec[1], exec[2], exec[3])
+    require("lvim.core.terminal").add_exec(exec[1], exec[2], exec[3], exec[4])
   end
   terminal.setup(lvim.builtin.terminal)
 
@@ -57,14 +57,28 @@ M.setup = function()
   end
 end
 
-M.add_exec = function(exec, keymap, name)
+local TERMINALS = {}
+
+M.add_exec = function(exec, keymap, name, direction)
+  local Terminal = require("toggleterm.terminal").Terminal
+  local exec_term = Terminal:new { cmd = exec, hidden = true, direction = direction }
+
+  TERMINALS[name] = exec_term
+
   vim.api.nvim_set_keymap(
     "n",
-    "<leader>" .. keymap,
-    "<cmd>lua require('lvim.core.terminal')._exec_toggle('" .. exec .. "')<CR>",
+    keymap,
+    "<cmd>lua require('lvim.core.terminal')._exec_toggle('" .. exec .. "','" .. name .. "')<CR>",
     { noremap = true, silent = true }
   )
-  lvim.builtin.which_key.mappings[keymap] = name
+  vim.api.nvim_set_keymap(
+    "t",
+    keymap,
+    "<cmd>lua require('lvim.core.terminal')._exec_toggle('" .. exec .. "','" .. name .. "')<CR>",
+    { noremap = true, silent = true }
+  )
+
+  -- lvim.builtin.which_key.mappings[keymap] = name
 end
 
 M._split = function(inputstr, sep)
@@ -78,15 +92,17 @@ M._split = function(inputstr, sep)
   return t
 end
 
-M._exec_toggle = function(exec)
+M._exec_toggle = function(exec, name)
   local binary = M._split(exec)[1]
   if vim.fn.executable(binary) ~= 1 then
     Log:error("Unable to run executable " .. binary .. ". Please make sure it is installed properly.")
     return
   end
-  local Terminal = require("toggleterm.terminal").Terminal
-  local exec_term = Terminal:new { cmd = exec, hidden = true }
-  exec_term:toggle()
+
+  TERMINALS[name]:toggle()
+  -- local Terminal = require("toggleterm.terminal").Terminal
+  -- local exec_term = Terminal:new { cmd = exec, hidden = true }
+  -- exec_term:toggle()
 end
 
 ---Toggles a log viewer according to log.viewer.layout_config
